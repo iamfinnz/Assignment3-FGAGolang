@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Monitoring Status Water & Wind</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        .status-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .status-box {
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .status-water {
+            background-color: #fff;
+            border: 1px solid #ccc;
+        }
+        .status-wind {
+            background-color: #fff;
+            border: 1px solid #ccc;
+        }
+        .status {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .bahaya {
+            background-color: red;
+        }
+        .siaga {
+            background-color: orange;
+        }
+        .aman {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monitor Status Water & Wind</h1>
+    <div class="status-container">
+        <div class="status-box status-water" id="water-box">
+            <div class="status" id="water_description">Loading...</div>
+            <div class="status" id="water-status">Loading...</div>
+            <div class="status">Water Level</div>
+        </div>
+        <div class="status-box status-wind" id="wind-box">
+            <div class="status" id="wind_description">Loading...</div>
+            <div class="status" id="wind-status">Loading...</div>
+            <div class="status">Wind Speed</div>
+        </div>
+    </div>
+    <script>
+
+        function getStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('water-status').innerText = `${data.water_status} (${data.status.water} meter)`;
+                    document.getElementById('wind-status').innerText = `${data.wind_status} (${data.status.wind} meter/second)`;
+
+                    var water_desc = document.getElementById("water_description")
+                    var wind_desc = document.getElementById("wind_description")
+
+                    // Ubah warna box water sesuai status
+                    if (data.water_status <= 5) {
+                        water_desc.innerHTML = "<b>Aman</b>"
+                        document.getElementById('water-box').classList.remove('bahaya');
+                        document.getElementById('water-box').classList.remove('siaga');
+                        document.getElementById('water-box').classList.add('aman');
+                    } else if (data.water_status >= 6 && data.water_status <= 8) {
+                        water_desc.innerHTML = "<b>Siaga</b>"
+                        document.getElementById('water-box').classList.remove('aman');
+                        document.getElementById('water-box').classList.remove('bahaya');
+                        document.getElementById('water-box').classList.add('siaga');
+                    } else {
+                        water_desc.innerHTML = "<b>Bahaya</b>"
+                        document.getElementById('water-box').classList.remove('aman');
+                        document.getElementById('water-box').classList.remove('siaga');
+                        document.getElementById('water-box').classList.add('bahaya');
+                    }
+
+                    // Ubah warna box wind sesuai status
+                    if (data.wind_status <= 6) {
+                        wind_desc.innerHTML = "<b>Aman</b>"
+                        document.getElementById('wind-box').classList.remove('bahaya');
+                        document.getElementById('wind-box').classList.remove('siaga');
+                        document.getElementById('wind-box').classList.add('aman');
+                    } else if (data.wind_status >= 7 && data.wind_status <= 15) {
+                        wind_desc.innerHTML = "<b>Siaga</b>"
+                        document.getElementById('wind-box').classList.remove('aman');
+                        document.getElementById('wind-box').classList.remove('bahaya');
+                        document.getElementById('wind-box').classList.add('siaga');
+                    } else {
+                        wind_desc.innerHTML = "<b>Bahaya</b>"
+                        document.getElementById('wind-box').classList.remove('aman');
+                        document.getElementById('wind-box').classList.remove('siaga');
+                        document.getElementById('wind-box').classList.add('bahaya');
+                    }
+                })
+                .catch(error => console.error('Error saat mengambil status:', error));
+        }
+
+
+        getStatus();
+
+        // Refresh status setiap 5 detik
+        setInterval(getStatus, 5000);
+    </script>
+</body>
+</html>
